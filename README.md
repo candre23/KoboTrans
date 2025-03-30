@@ -1,10 +1,10 @@
 # AI Subtitle Translator
 
-A Python script to translates SubRip (.srt) subtitle files using AI (g4f) in seconds.
+A multi-thread Python script to translate SubRip (.srt) subtitles using AI (g4f) in seconds.
 
 ## Description
 
-The script takes an input .srt file, translates the subtitle text from a specified input language to an output language using an AI, and saves the translated subtitles to a new .srt file. It utilizes `g4f` for AI model interaction.
+The script takes an input .srt file, translates the subtitle text from a specified input language to a specified output language using an AI model (at the moment **deepseek-v3** by **Blackbox**) from [gpt4free](https://github.com/xtekky/gpt4free), and saves the translated subtitles to a new .srt file.
 
 ## Dependencies
 
