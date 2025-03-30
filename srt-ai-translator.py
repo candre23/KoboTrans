@@ -70,12 +70,14 @@ def main():
     parser.add_argument("input_lang", help="input language")
     parser.add_argument("output_lang", help="output language")
     parser.add_argument("output_file", help="output path for the .srt file")
+    parser.add_argument("--threads",type=int,help="number of threads",default=100)
 
     args = parser.parse_args()
-    input_file = args.input_file
+    input_file = os.path.abspath(args.input_file)
     input_lang = check_language(args.input_lang)
     output_lang = check_language(args.output_lang)
-    output_file = args.output_file
+    output_file = os.path.abspath(args.output_file)
+    threads_number = args.threads
     
     # ERROR CHECK
     if not os.path.exists(input_file):
@@ -86,6 +88,9 @@ def main():
         return 1
     if output_lang == False:
         print("ERR: invalid output language.")
+        return 1
+    if not (isinstance(threads_number, int) and threads_number > 0):
+        print("ERR: invalid threads value.")
         return 1
 
     # SUMMARY
@@ -98,7 +103,6 @@ def main():
 
     # TRANSLATION
     threads = []
-    threads_number = 500
     with tqdm(total=len(subtitles_list), desc=f"Translating ({threads_number} threads)") as pbar:
         for subtitle in subtitles_list:
             thread = threading.Thread(target=translate_subtitle, args=(client,subtitle,input_lang,output_lang,pbar))
