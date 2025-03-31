@@ -23,8 +23,13 @@ pip install g4f\[all\] argparse pycountry tqdm colorama
 
 ## Usage
 
+**Help:**
 ```bash
-python srt-ai-translator.py input.srt eng ita output.srt
+python srt-ai-translator.py -h
+```
+**Translation:**
+```bash
+python srt-ai-translator.py input.srt eng ita
 ```
 
 Available languages: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php)
