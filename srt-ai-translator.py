@@ -2,6 +2,7 @@ from g4f.client import Client
 from g4f.Provider import Blackbox
 from tqdm import tqdm
 import os, threading, json, pycountry, argparse, time
+from colorama import init, Fore
 
 def srt_to_dict(file_path):
     subtitles = []
@@ -46,7 +47,7 @@ def translate_subtitle(client, subtitle, input_lang, output_lang, pbar):
             pbar.update(1)
             return  # Translation successful, exit the function
         except Exception as e:
-            print(f"ERR: sub {subtitle['id']} -> {e}, retry {retries + 1}/{max_retries + 1}")
+            print(f"{Fore.YELLOW}ERR: sub {subtitle['id']} -> {e}, {Fore.GREEN}retry {retries + 1}/{max_retries + 1}")
             retries += 1
             if retries <= max_retries:
                 time.sleep(5)  # Wait for a short time before retrying
@@ -64,37 +65,44 @@ def check_language(lang_code):
         return False
 
 def main():
+    # COLORAMA SETUP
+    init(autoreset=True)
+
     # ARGUMENTS
     parser = argparse.ArgumentParser(description="translate a SRT file using gpt4free.")
     parser.add_argument("input_file", help="input path for the .srt file")
-    parser.add_argument("input_lang", help="input language")
-    parser.add_argument("output_lang", help="output language")
-    parser.add_argument("output_file", help="output path for the .srt file")
-    parser.add_argument("--threads",type=int,help="number of threads",default=100)
+    parser.add_argument("input_lang", help="input language (iso639): eng,fre,ita,jpn..")
+    parser.add_argument("output_lang", help="output language (iso639): eng,fre,ita,jpn..")
+    parser.add_argument("-o", "--output_file",help="custom output path for the .srt file")
+    parser.add_argument("-t", "--threads",type=int,help="number of threads",default=100)
 
     args = parser.parse_args()
     input_file = os.path.abspath(args.input_file)
     input_lang = check_language(args.input_lang)
     output_lang = check_language(args.output_lang)
-    output_file = os.path.abspath(args.output_file)
+    if args.output_file is None:
+        nome_base, estensione = os.path.splitext(input_file)
+        output_file = nome_output = nome_base + "_" + args.output_lang + estensione
+    else:
+        output_file = os.path.abspath(args.input_file)
     threads_number = args.threads
     
     # ERROR CHECK
     if not os.path.exists(input_file):
-        print("ERR: input file not found.")
+        print(f"{Fore.RED}ERR: input file not found.")
         return 1
     if input_lang == False:
-        print("ERR: invalid input language.")
+        print(f"{Fore.RED}ERR: invalid input language (iso639): eng,fre,ita,jpn..")
         return 1
     if output_lang == False:
-        print("ERR: invalid output language.")
+        print(f"{Fore.RED}ERR: invalid output language (iso639): eng,fre,ita,jpn..")
         return 1
     if not (isinstance(threads_number, int) and threads_number > 0):
-        print("ERR: invalid threads value.")
+        print(f"{Fore.RED}ERR: invalid threads value.")
         return 1
 
     # SUMMARY
-    print(f"Translating {input_file} [{input_lang}->{output_lang}]")
+    print(f"Input: {Fore.BLUE}{input_file}{Fore.RESET}\nOutput:{Fore.BLUE}{output_file}{Fore.RESET}\nLanguage: {Fore.GREEN}{input_lang}{Fore.RESET}->{Fore.GREEN}{output_lang}{Fore.RESET}")
 
     # PARAMETERS
     file_name, file_ext = os.path.splitext(input_file)
@@ -103,7 +111,7 @@ def main():
 
     # TRANSLATION
     threads = []
-    with tqdm(total=len(subtitles_list), desc=f"Translating ({threads_number} threads)") as pbar:
+    with tqdm(total=len(subtitles_list), desc=f"Translating ({Fore.YELLOW}{threads_number} threads{Fore.RESET})") as pbar:
         for subtitle in subtitles_list:
             thread = threading.Thread(target=translate_subtitle, args=(client,subtitle,input_lang,output_lang,pbar))
             threads.append(thread)
