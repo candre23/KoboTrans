@@ -15,3 +15,7 @@ python kobotrans.py movie.srt eng ita
 This will create a translated file "movie_ita.srt"
 
 Available language codes: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php)
+
+## Dependencies
+
+requests, json, tqdm, os, threading, pycountry, argparse, time, colorama
