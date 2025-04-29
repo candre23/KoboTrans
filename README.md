@@ -1,35 +1,17 @@
-# AI Subtitle Translator
+# KCPP Subtitle Translator
 
-A multi-thread Python script to translate SubRip (.srt) subtitles using AI (g4f) in seconds.
-
-## Description
-
-The script takes an input .srt file, translates the subtitle text from a specified input language to a specified output language using an AI model (at the moment **deepseek-v3** by **Blackbox**) from [gpt4free](https://github.com/xtekky/gpt4free), and saves the translated subtitles to a new .srt file. No api/token needed.
-
-## Dependencies
-
-1. Generate a virtual environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-2. Install dependences
-
-```bash
-pip install g4f\[all\] argparse pycountry tqdm colorama
-```
+A Python script to translate SubRip (.srt) subtitles using KoboldCPP as the AI backend.  This is a quick and dirty hack of https://github.com/passthesh3ll/srt-ai-translator, using gemini and some trial & error instead of actual skill or understanding.  Works well with Qwen3 models - may require tweaking for others.   Currently hardcoded to look for KCPP running locally on port 5001.
 
 ## Usage
 
-**Help**:
 ```bash
-python srt-ai-translator.py -h
+python kobotrans.py <input SRT File> <input language code> <output language code>
 ```
-**Translation** *(Available languages: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php))*:
-```bash
-python srt-ai-translator.py input.srt eng ita
-```
+So for example, if you wanted to translate the English subtitle file "movie.srt" into Italian, you would use
 
-![image](https://i.postimg.cc/VN72nZhw/rec.gif)
+```bash
+python kobotrans.py movie.srt eng ita
+```
+This will create a translated file "movie_ita.srt"
+
+Available language codes: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php)
