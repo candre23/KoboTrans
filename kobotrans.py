@@ -7,6 +7,40 @@ from colorama import init, Fore
 # KoboldCPP API endpoint
 KOBOLDCPP_API_URL = "http://localhost:5001/api/v1/generate"
 
+def parse_srt_timestamp(ts: str) -> int:
+    # "HH:MM:SS,mmm" -> total milliseconds
+    h, m, s_ms = ts.split(':')
+    s, ms = s_ms.split(',')
+    return ((int(h) * 60 + int(m)) * 60 + int(s)) * 1000 + int(ms)
+
+def format_srt_timestamp(ms: int) -> str:
+    if ms < 0:
+        ms = 0
+    seconds, ms = divmod(ms, 1000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{ms:03d}"
+
+def add_ai_credit_subtitle(subtitles, input_lang_name: str, output_lang_name: str):
+    if not subtitles:
+        return
+    last = subtitles[-1]
+    last_end_ms = parse_srt_timestamp(last['time-end'])
+    start_ms = last_end_ms + 2000   # +2 seconds
+    end_ms   = start_ms + 3000      # 3 seconds duration
+
+    new_id = str(int(last['id']) + 1)
+    msg = f"This subtitle track was AI-translated from {input_lang_name} to {output_lang_name} with KoboTrans."
+
+    subtitles.append({
+        'id': new_id,
+        'time-start': format_srt_timestamp(start_ms),
+        'time-end': format_srt_timestamp(end_ms),
+        # Keep both for completeness; writer uses 'translated'
+        'text': msg,
+        'translated': msg,
+    })
+
 def srt_to_dict(file_path):
     subtitles = []
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -234,8 +268,13 @@ def main():
 
     # FINAL SAVE
     print(f"\nTranslation complete. Saving to {Fore.BLUE}{output_file}{Fore.RESET}")
+
+    # Add the KoboTrans credit subtitle (2s after last end, for 3s)
+    add_ai_credit_subtitle(subtitles_list, input_lang_name, output_lang_name)
+
     dict_to_srt(subtitles_list, output_file)
     print(f"{Fore.GREEN}Successfully saved translated SRT.{Fore.RESET}")
+
 
 if __name__ == "__main__":
     main()
